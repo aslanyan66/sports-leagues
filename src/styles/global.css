@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* `dark:` follows the data-theme attribute on <html> (set by the theme store), not only the OS setting. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Theme tokens: SportyBet-inspired red on a cool "floodlight" grey (light) or deep pitch-night navy (dark).
+ * Components only use the semantic names below (bg-surface, text-fg-muted, …), never raw hex values.
+ */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --surface-muted: #e9ecf1;
+  --border: #dde1e8;
+  --border-strong: #c3c9d4;
+  --fg: #141b2d;
+  --fg-muted: #5a6478;
+  --brand: #ec1c24; /* large text and accents only */
+  --brand-strong: #c9141b; /* button backgrounds: 5.9:1 with white text */
+  --brand-strong-hover: #a80f16;
+  --brand-text: #b3121a; /* brand-coloured small text: 6.5:1 on white */
+  --brand-soft: #fde3e4;
+  --on-brand: #ffffff;
+  --header: #ec1c24;
+  --header-fg: #ffffff;
+  --focus: #141b2d;
+  --spotlight: radial-gradient(circle at 50% 40%, #ffffff 0%, #e9ecf1 70%);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0e1424;
+  --surface: #172036;
+  --surface-muted: #1f2a44;
+  --border: #2a3654;
+  --border-strong: #3b4a6e;
+  --fg: #eef1f6;
+  --fg-muted: #9aa5bc;
+  --brand: #ec1c24;
+  --brand-strong: #c9141b;
+  --brand-strong-hover: #e3242c;
+  --brand-text: #ff6b70;
+  --brand-soft: rgb(236 28 36 / 16%);
+  --on-brand: #ffffff;
+  --header: #172036;
+  --header-fg: #ffffff;
+  --focus: #ff8a8e;
+  --spotlight: radial-gradient(circle at 50% 40%, #2a3654 0%, #172036 70%);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-strong-hover: var(--brand-strong-hover);
+  --color-brand-text: var(--brand-text);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-header: var(--header);
+  --color-header-fg: var(--header-fg);
+  --color-focus: var(--focus);
+
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, sans-serif;
+
+  --background-image-spotlight: var(--spotlight);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

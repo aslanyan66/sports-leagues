@@ -11,7 +11,7 @@ interface ILeagueSeasonsProps {
 
 /** Picks loading, error, "no seasons" or the carousel for one league. */
 export const LeagueSeasons = ({ leagueId, leagueName }: ILeagueSeasonsProps) => {
-  const { data: seasons, isPending, isError, isRefetching, refetch } = useSeasons(leagueId);
+  const { data: seasons, isPending, isError, refetch } = useSeasons(leagueId);
 
   if (isPending) {
     return <Spinner label="Loading season badges" className="min-h-80" />;
@@ -25,7 +25,7 @@ export const LeagueSeasons = ({ leagueId, leagueName }: ILeagueSeasonsProps) => 
         title="Season badges couldn't load"
         description="Check your internet connection, then try again."
         action={
-          <Button variant="secondary" onClick={() => void refetch()} disabled={isRefetching}>
+          <Button variant="secondary" onClick={() => void refetch()}>
             <RefreshCw aria-hidden="true" />
             Try again
           </Button>
@@ -44,5 +44,6 @@ export const LeagueSeasons = ({ leagueId, leagueName }: ILeagueSeasonsProps) => 
     );
   }
 
-  return <SeasonCarousel seasons={seasons} leagueName={leagueName} />;
+  // Keyed by league: another league always starts a fresh carousel at its first season.
+  return <SeasonCarousel key={leagueId} seasons={seasons} leagueName={leagueName} />;
 };

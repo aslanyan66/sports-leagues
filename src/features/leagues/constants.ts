@@ -2,7 +2,10 @@
 export const UNKNOWN_SPORT = 'Other';
 
 /** Radix Select can't use an empty string as an item value, so "all sports" gets a sentinel. */
-export const ALL_SPORTS_VALUE = 'all';
+export const ALL_SPORTS_VALUE = '__all_sports__';
+
+/** Id of the league search input, so focus can return there (e.g. after "Clear filters"). */
+export const LEAGUE_SEARCH_INPUT_ID = 'league-search';
 
 /** Delay before a typed search is applied to the list. */
 export const SEARCH_DEBOUNCE_MS = 250;

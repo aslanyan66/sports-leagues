@@ -7,7 +7,7 @@ interface ILeagueSeasonsHeaderProps {
 
 /** Dialog title + description; Radix wires them to the dialog's accessible name/description. */
 export const LeagueSeasonsHeader = ({ league }: ILeagueSeasonsHeaderProps) => {
-  const alternateName = league.strLeagueAlternate?.trim();
+  const alternateName = league.strLeagueAlternate;
 
   return (
     <div className="flex flex-col gap-2 px-4 pt-4 pr-16 sm:px-5 md:px-6 md:pt-6">

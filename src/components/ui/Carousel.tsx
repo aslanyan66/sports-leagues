@@ -22,6 +22,10 @@ interface ICarouselProps {
   className?: string;
 }
 
+const prefersReducedMotion = (): boolean =>
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export const Carousel = ({ label, count, children, className }: ICarouselProps) => {
   const baseId = useId();
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center' });
@@ -57,7 +61,8 @@ export const Carousel = ({ label, count, children, className }: ICarouselProps) 
     selectedIndexRef.current = next;
     setSelectedIndex(next);
     setAnnouncedIndex(announce ? next : null);
-    emblaApi?.scrollTo(next);
+    // Embla animates in JavaScript, which the CSS reduced-motion rule can't reach: jump instead.
+    emblaApi?.scrollTo(next, prefersReducedMotion());
   };
 
   return (

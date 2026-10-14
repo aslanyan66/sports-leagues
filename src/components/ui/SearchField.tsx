@@ -2,14 +2,23 @@ import { Search, X } from 'lucide-react';
 import { useId, useRef } from 'react';
 
 interface ISearchFieldProps {
+  /** Fixed id, so other code can move focus here; generated when omitted. */
+  id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }
 
-export const SearchField = ({ label, value, onChange, placeholder }: ISearchFieldProps) => {
-  const id = useId();
+export const SearchField = ({
+  id: idProp,
+  label,
+  value,
+  onChange,
+  placeholder,
+}: ISearchFieldProps) => {
+  const generatedId = useId();
+  const id = idProp ?? generatedId;
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -33,7 +42,7 @@ export const SearchField = ({ label, value, onChange, placeholder }: ISearchFiel
           onChange={(event) => {
             onChange(event.target.value);
           }}
-          className="min-h-11 w-full rounded-lg border border-border-strong bg-surface py-2 pr-11 pl-10 text-base text-fg transition-colors placeholder:text-fg-muted hover:border-fg-muted focus-visible:border-fg [&::-webkit-search-cancel-button]:hidden"
+          className="min-h-11 w-full rounded-lg border border-input-border bg-surface py-2 pr-11 pl-10 text-base text-fg transition-colors placeholder:text-fg-muted hover:border-fg-muted focus-visible:border-fg [&::-webkit-search-cancel-button]:hidden"
         />
         {value ? (
           <button

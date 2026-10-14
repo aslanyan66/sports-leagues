@@ -8,7 +8,6 @@ export const buttonVariants = cva(
       variant: {
         primary: 'bg-brand-strong text-on-brand hover:bg-brand-strong-hover',
         secondary: 'border border-border-strong bg-surface text-fg hover:border-fg-muted',
-        ghost: 'text-fg hover:bg-surface-muted',
       },
       size: {
         md: 'min-h-11 px-4 text-base',

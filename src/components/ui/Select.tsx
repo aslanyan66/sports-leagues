@@ -2,7 +2,7 @@ import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
 import { Select as SelectPrimitive } from 'radix-ui';
 import { useId } from 'react';
 
-/** `TValue` narrows the values to a union (e.g. `'asc' | 'desc'`) when needed; defaults to any string. */
+/** `TValue` narrows the values to a string union when a caller needs it; defaults to any string. */
 export interface ISelectOption<TValue extends string = string> {
   value: TValue;
   label: string;
@@ -50,7 +50,7 @@ export const Select = <TValue extends string>({
       <SelectPrimitive.Root value={value} onValueChange={handleValueChange} disabled={disabled}>
         <SelectPrimitive.Trigger
           aria-labelledby={labelId}
-          className="group flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-border-strong bg-surface px-3 text-left text-base text-fg transition-colors hover:border-fg-muted disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-fg"
+          className="group flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input-border bg-surface px-3 text-left text-base text-fg transition-colors hover:border-fg-muted disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-fg"
         >
           <SelectPrimitive.Value />
           <SelectPrimitive.Icon asChild>

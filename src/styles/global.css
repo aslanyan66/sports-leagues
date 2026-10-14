@@ -16,6 +16,7 @@
   --surface-muted: #e9ecf1;
   --border: #dde1e8;
   --border-strong: #c3c9d4;
+  --input-border: #7d879c; /* 3.6:1 on surface: form-control edges need 3:1 (WCAG 1.4.11) */
   --fg: #141b2d;
   --fg-muted: #5a6478;
   --brand: #ec1c24; /* large text and accents only */
@@ -37,6 +38,7 @@
   --surface-muted: #1f2a44;
   --border: #2a3654;
   --border-strong: #3b4a6e;
+  --input-border: #66779b;
   --fg: #eef1f6;
   --fg-muted: #9aa5bc;
   --brand: #ec1c24;
@@ -57,6 +59,7 @@
   --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-input-border: var(--input-border);
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-brand: var(--brand);

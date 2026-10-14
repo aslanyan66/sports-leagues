@@ -4,10 +4,10 @@
 
 State is split by where it comes from:
 
-- **Server state → TanStack Query.** League data and seasons come from the API. TanStack Query handles caching, loading/error states, request de-duplication and cancellation. This directly covers the "cache responses to avoid repeat calls" requirement.
+- **Server state → TanStack Query.** League data and seasons come from the API. TanStack Query handles caching, loading/error states and request de-duplication. This directly covers the "cache responses to avoid repeat calls" requirement.
 - **UI state → Zustand.** Search text, selected sport and the open league live in a small store (`features/leagues/store`). Components subscribe to just the values they read, so typing in the search box doesn't re-render the dropdown.
 
-Why not Redux or Context: Redux Toolkit is a lot of setup for three values. Context re-renders every consumer on every change, which is a poor fit for a search box that updates on each keystroke. Zustand is ~1 KB, needs no provider and is easy to test outside React.
+Why not Redux or Context: Redux Toolkit is a lot of setup for four values. Context re-renders every consumer on every change, which is a poor fit for a search box that updates on each keystroke. Zustand is ~1 KB, needs no provider and is easy to test outside React.
 
 ## Caching
 
@@ -46,8 +46,8 @@ Why not Redux or Context: Redux Toolkit is a lot of setup for three values. Cont
 
 - **Direction:** a bookmaker's league board. Barlow Condensed (league names, headings, season years) gives a scoreboard feel; Barlow for body text. The one "loud" element is the season dialog: the badge on a spotlight with large season numerals and a timeline of seasons. Everything else stays quiet.
 - **Tailwind CSS v4** with semantic theme tokens (`bg-surface`, `text-fg-muted`, `bg-brand-strong`…) defined once in `src/styles/global.css`.
-- **Light and dark themes** in a SportyBet-inspired palette (brand red `#EC1C24`). Colors are CSS variables switched by `data-theme` on `<html>`. The first visit follows the OS setting, and the user's choice is saved. An inline script in `index.html` applies the theme before the first paint, so there's no flash.
-- **Contrast:** buttons use a darker red (`#C9141B`, 5.9:1 with white) because the brand red is just under the 4.5:1 minimum for normal-size text. The bright red is kept for large text and accents.
+- **Light and dark themes** in a SportyBet-inspired palette (brand red `#EC1C24`). The browser bar color (`theme-color`) follows the header of the current theme. Colors are CSS variables switched by `data-theme` on `<html>`. The first visit follows the OS setting, and the user's choice is saved. An inline script in `index.html` applies the theme before the first paint, so there's no flash.
+- **Contrast:** text fields and the dropdown have a darker border (`input-border`, 3.6:1 in both themes), since a form control's edge must reach 3:1. Buttons use a darker red (`#C9141B`, 5.9:1 with white) because the brand red is just under the 4.5:1 minimum for normal-size text. The bright red is kept for large text and accents.
 - **Building blocks:** generic UI pieces (Button, Chip, SearchField, Select, Dialog, Carousel, Skeleton, StateMessage) are composed into league-specific components. Radix UI provides the accessible behavior for the dropdown and dialog; Embla provides swipe for the carousel.
 - **Responsive:** 1-column grid on phones, then 2 and 3 columns. Filters stack on mobile. The seasons dialog is centered on every screen: 16 px from the screen edges on phones, scrolling inside itself if the screen is short, and the badge shrinks to fit landscape phones. Touch targets are at least 44 px.
 - **Performance:** the dialog and carousel code is its own chunk (~15 KB gzipped), downloaded only when a league card is hovered, focused or opened. Badges on slides other than the first use `loading="lazy"`.
@@ -59,7 +59,7 @@ The leagues page is composed from small single-purpose components (generic piece
 ```
 LeaguesPage
 ├── PageHeader
-├── LeagueFilters ............ search landmark (toolbar)
+├── LeagueFilters ............ search landmark
 │   ├── LeagueSearch → SearchField
 │   └── SportSelect → Select (Radix)
 ├── LeagueResults ............ loading / error / empty / sections per sport
@@ -83,11 +83,11 @@ LeaguesPage
 
 - **Keyboard:** everything is reachable with Tab, with visible focus rings. A "Skip to content" link is the first focusable element.
 - **Dropdown:** Radix Select (arrow keys, type-ahead, Esc).
-- **Dialog:** focus moves into it and is trapped while open; Esc or the close button closes it; focus returns to the league card that opened it.
+- **Dialog:** on open, focus goes to the dialog itself, so screen readers start from its title (not a dimmed "Previous" button); it's trapped while open; the close button comes first in Tab order, matching its top-right position; Esc or the close button closes it; focus returns to the league card that opened it.
 - **Carousel:** follows the WAI-ARIA "tabbed carousel" pattern. The season timeline is a tablist (arrow keys, Home, End), each slide is its tab panel, and the selected tab scrolls into view (only the timeline scrolls, never the dialog). Each tab's name contains its visible text ("Season 1992–93", with "Season" for screen readers only), so voice-control users can say what they see. Changes from the previous/next buttons or a swipe are announced ("Season 1993-1994, 2 of 5"); tab changes aren't repeated, because the focused tab is already read out.
-- **No lost focus:** buttons that become unavailable while focused (previous/next at either end, "Try again" while retrying) use `aria-disabled` instead of `disabled`, so they stay focusable.
+- **No lost focus:** previous/next use `aria-disabled` instead of `disabled` at either end, so they stay focusable. "Clear filters" and a successful "Try again" disappear once used, so focus moves to the search field instead of falling back to the page start.
 - **Screen readers:** labelled controls, result count announced as it changes (`aria-live`, visually hidden since each sport heading shows its count; the only announcement for an empty result), loading states use `role="status"`, errors use `role="alert"`, decorative icons are hidden.
-- **Motion:** all animations are switched off for users who prefer reduced motion.
+- **Motion:** CSS animations are switched off for users who prefer reduced motion, and the carousel jumps between seasons instead of sliding (Embla animates in JavaScript, which the CSS rule can't reach).
 
 ## Errors and routing
 
@@ -95,6 +95,7 @@ LeaguesPage
 - **Route error boundary** (`errorElement`): any error thrown while rendering a page shows the error page with "Reload page" and "Back to leagues". In development it also shows the error message.
 - **Top-level error boundary** (`react-error-boundary`): catches errors outside the router, such as in providers.
 - API errors are not page crashes: they're shown in place with a "Try again" button.
+- If the dialog's code chunk fails to download (e.g. offline), a local error boundary shows "Season badges couldn't open" with a retry, instead of the error replacing the whole page. React.lazy remembers a failed import, so a retry creates a fresh lazy component. Hover/focus preloads ignore failures.
 
 ## Testing
 
@@ -108,9 +109,9 @@ Vitest + React Testing Library, with **MSW** mocking the API at the network leve
 
 - **DTOs vs app types:** `features/leagues/types/league.dto.ts` holds the exact API response shapes (`ILeagueDto`, `ISeasonsResponseDto`…). They're only used at the API boundary and mapped to the app's types (`ILeague`, `ISeason` in `league.ts`) by `normalizeLeagues` / `normalizeSeasons`. Components never see raw API data.
 - **Naming:** object shapes (DTOs, component props, store state) are `interface`s with an `I` prefix (`ILeagueCardProps`); unions and aliases stay `type` (`type Theme = 'light' | 'dark'`). Every component has a named props interface. Both rules are enforced by ESLint.
-- **Generic components:** shared components that take a list of values are generic over the value type. `Select<TValue>` can be used with a union (e.g. `ISelectOption<'asc' | 'desc'>[]`), so `onChange` receives that exact type and a wrong option value is a compile error. It maps Radix's plain string back to the typed option instead of casting.
+- **Generic components:** shared components that take a list of values are generic over the value type. `Select<TValue>` can be used with a string union, so `onChange` receives that exact type and a wrong option value is a compile error. It maps Radix's plain string back to the typed option instead of casting.
 - **Public APIs (`index.ts`):** `@/components`, `@/hooks` and each feature (`@/features/leagues`) are imported through their `index.ts`, so a page needs one import line per module. A feature's index exports only what pages use (its three top-level components); the rest of the feature stays internal. Files inside a module import each other directly, which keeps the index files free of cycles. ESLint enforces both. Test setup and mocks may use feature internals to build fixtures. `package.json` declares `sideEffects` (only CSS and `main.tsx`), so the bundler can still drop unused re-exports: without it, the barrel pulled the dialog and carousel code into the main bundle.
-- **No hardcoded API details:** the base URL comes from `.env` (`VITE_API_URL`, validated in `src/config/env.ts`). Endpoint paths, query parameter names, image sizes and the JSON content type live in `src/constants/api.ts`. Feature-level values (the "all sports" value, the fallback sport name, the debounce delay) live in `features/leagues/constants.ts`. An ESLint rule fails the build if a URL literal appears in app code.
+- **No hardcoded API details:** the base URL comes from `.env` (`VITE_API_URL`, validated in `src/config/env.ts`). Endpoint paths, query parameter names, image sizes and the JSON content type live in `src/constants/api.ts`. Feature-level values (the "all sports" value, the fallback sport name, the debounce delay) live in `features/leagues/constants.ts`. An ESLint rule fails lint (and CI) if a URL literal appears in app code.
 
 ## Tooling
 

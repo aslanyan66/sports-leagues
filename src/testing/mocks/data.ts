@@ -2,8 +2,8 @@ import type { ILeague } from '@/features/leagues/types/league';
 import type { ILeagueDto, ISeasonsResponseDto } from '@/features/leagues/types/league.dto';
 import { normalizeLeagues } from '@/features/leagues/utils/normalize-leagues';
 
-// Raw API responses, shaped like the real free-tier API: Soccer and Motorsport only (no Basketball),
-// alternate names only on some leagues, and one league whose seasons have no badges.
+// Raw API responses in the real API's shape, but deliberately richer than the live free-key sample:
+// two sports, alternate names on some leagues, and one league whose seasons have no badges.
 export const mockLeagueDtos: ILeagueDto[] = [
   {
     idLeague: '4328',

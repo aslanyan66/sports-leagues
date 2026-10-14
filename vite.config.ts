@@ -14,6 +14,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/testing/setup.ts'],
+    // Spies are restored after every test, even one that fails before its own cleanup.
+    restoreMocks: true,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

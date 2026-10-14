@@ -6,6 +6,11 @@ import { useLeaguesUiStore } from '@/features/leagues/store/leagues-ui.store';
 import type { ILeague } from '@/features/leagues/types/league';
 import { getLeagueCardId } from '@/features/leagues/utils/league-card-id';
 
+// Only a head start: if it fails, opening the dialog loads it again and shows any error.
+const preloadSeasonsDialog = () => {
+  loadLeagueSeasonsDialog().catch(() => undefined);
+};
+
 interface ILeagueCardProps {
   league: ILeague;
 }
@@ -13,7 +18,7 @@ interface ILeagueCardProps {
 /** A league as one large button: sport, name, alternate name. Opens the seasons dialog. */
 export const LeagueCard = ({ league }: ILeagueCardProps) => {
   const openSeasonsDialog = useLeaguesUiStore((state) => state.openSeasonsDialog);
-  const alternateName = league.strLeagueAlternate?.trim();
+  const alternateName = league.strLeagueAlternate;
 
   return (
     <button
@@ -24,8 +29,8 @@ export const LeagueCard = ({ league }: ILeagueCardProps) => {
         openSeasonsDialog(league.idLeague);
       }}
       // Start downloading the dialog chunk as soon as the user shows intent.
-      onPointerEnter={() => void loadLeagueSeasonsDialog()}
-      onFocus={() => void loadLeagueSeasonsDialog()}
+      onPointerEnter={preloadSeasonsDialog}
+      onFocus={preloadSeasonsDialog}
       className="group flex h-full w-full cursor-pointer flex-col items-start gap-3 rounded-xl border border-border bg-surface p-4 text-left transition-colors hover:border-brand focus-visible:border-brand"
     >
       <Chip>{league.strSport}</Chip>

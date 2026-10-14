@@ -20,7 +20,7 @@ export const SeasonYearNav = ({ seasons }: ISeasonYearNavProps) => (
     className="flex gap-1 overflow-x-auto border-b border-border"
     tabClassName={(isSelected) =>
       cn(
-        '-mb-px min-h-11 shrink-0 cursor-pointer border-b-2 px-3 font-display text-lg font-semibold whitespace-nowrap tabular-nums transition-colors',
+        '-mb-px min-h-11 shrink-0 cursor-pointer border-b-2 px-3 font-display text-lg font-semibold whitespace-nowrap tabular-nums transition-colors focus-visible:-outline-offset-2',
         isSelected ? 'border-brand text-fg' : 'border-transparent text-fg-muted hover:text-fg',
       )
     }

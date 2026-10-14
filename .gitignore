@@ -24,9 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Env (.env holds public defaults and is committed)
-.env.*.local
-
 # Tests
 coverage
 

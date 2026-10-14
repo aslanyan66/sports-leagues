@@ -85,6 +85,7 @@ src/
 ├── api/         # HTTP client (fetch wrapper)
 ├── config/      # Typed environment variables
 ├── constants/   # API endpoints, routes, storage keys
+├── types/       # Shared types (API query params)
 ├── lib/         # Configured libraries (QueryClient)
 ├── store/       # App-wide state (theme)
 ├── styles/      # Tailwind entry and theme tokens

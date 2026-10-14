@@ -63,6 +63,8 @@ describe('LeaguesPage: list and filters', () => {
     await leagueButton(/English Premier League/);
 
     await user.type(screen.getByRole('searchbox', { name: 'League name' }), 'formula');
+    // Debounced: right after typing, the list hasn't changed yet.
+    expect(getCardNames()).toHaveLength(4);
 
     await waitFor(() => {
       expect(getCardNames()).toHaveLength(1);
@@ -82,9 +84,11 @@ describe('LeaguesPage: list and filters', () => {
 
     await user.click(screen.getByRole('button', { name: 'Clear filters' }));
 
-    // No debounce wait: the full list is back right away.
+    // No debounce wait: the full list is back right away, and focus returns to the search field
+    // instead of being lost with the button.
     expect(screen.getByText('4 leagues')).toBeInTheDocument();
     expect(screen.getByRole('searchbox', { name: 'League name' })).toHaveValue('');
+    expect(screen.getByRole('searchbox', { name: 'League name' })).toHaveFocus();
   });
 
   it('offers only sports from the API, with counts, and filters by sport', async () => {
@@ -140,8 +144,11 @@ describe('LeaguesPage: season badges dialog', () => {
       'https://example.com/epl-1992.png/small',
     );
     expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992–93' })).toBeVisible();
-    // Nothing is announced on open: the dialog title and description are read instead.
+    // The dialog itself gets focus, so screen readers start from its title and description, and
+    // nothing is announced on top of that.
+    expect(dialog).toHaveFocus();
     expect(within(dialog).getByText('1 / 3')).toBeInTheDocument();
+    expect(within(dialog).queryByText(/, \d of 3$/)).not.toBeInTheDocument();
   });
 
   it('navigates seasons with previous/next buttons', async () => {
@@ -157,7 +164,7 @@ describe('LeaguesPage: season badges dialog', () => {
     expect(previous).toBeEnabled();
 
     await user.click(next);
-    expect(within(dialog).getByText('Season 1993-1994, 2 of 3')).toBeInTheDocument();
+    expect(within(dialog).getByText('Season 1993–94, 2 of 3')).toBeInTheDocument();
     expect(within(dialog).getByRole('tab', { name: 'Season 1993–94' })).toHaveAttribute(
       'aria-selected',
       'true',
@@ -203,6 +210,13 @@ describe('LeaguesPage: season badges dialog', () => {
 
     await user.keyboard('{ArrowRight}');
     expect(tabs[0]).toHaveFocus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(tabs[2]).toHaveFocus();
+
+    await user.keyboard('{Home}');
+    expect(tabs[0]).toHaveFocus();
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
 
     // Tab changes aren't repeated in the live region: the focused tab is read out already.
     expect(within(dialog).queryByText(/, \d of 3$/)).not.toBeInTheDocument();

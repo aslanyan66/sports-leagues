@@ -1,4 +1,4 @@
-import { CarouselTabs } from '@/components/ui/Carousel';
+import { CarouselTabs } from '@/components';
 import type { ISeason } from '@/features/leagues/types/league';
 import { formatSeason } from '@/features/leagues/utils/format-season';
 import { cn } from '@/utils/cn';
@@ -11,8 +11,12 @@ interface ISeasonYearNavProps {
 export const SeasonYearNav = ({ seasons }: ISeasonYearNavProps) => (
   <CarouselTabs
     label="Seasons"
-    getTabLabel={(index) => `Season ${seasons[index]?.name ?? ''}`}
-    renderTab={(index) => formatSeason(seasons[index]?.name ?? '')}
+    renderTab={(index) => (
+      <>
+        {/* The space sits outside the hidden span, so the name reads "Season 1992–93". */}
+        <span className="sr-only">Season</span> {formatSeason(seasons[index]?.name ?? '')}
+      </>
+    )}
     className="flex gap-1 overflow-x-auto border-b border-border"
     tabClassName={(isSelected) =>
       cn(

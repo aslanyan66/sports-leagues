@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components';
 import { LEAGUE_SKELETON_COUNT } from '@/features/leagues/constants';
 
 export const LeagueListSkeleton = () => (

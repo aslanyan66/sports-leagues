@@ -28,14 +28,17 @@ Why not Redux or Context: Redux Toolkit is a lot of setup for three values. Cont
 ## Filtering
 
 - League data is trimmed once when it arrives (`normalizeLeagues`), so the filter and the dropdown always compare the same values.
-- Name search is case-insensitive, trims spaces and is debounced by 250 ms. Clearing it applies immediately, and the empty-state message describes the filters actually applied, not the half-typed query.
+- Name search is case-insensitive, trims spaces and is debounced by 250 ms. Clearing it applies immediately and cancels any search still waiting, so typing again right after clearing never brings back the old one. The empty-state message describes the filters actually applied, not the half-typed query.
 - It also matches `strLeagueAlternate` when the API provides it.
-- The sport dropdown always offers the sports named in the brief (Soccer, Basketball, Motorsport) plus any other sport found in the data. Picking a sport with no leagues (Basketball on the free API key) shows an empty state with a "Clear filters" action.
-- Filtering is a pure function (`filter-leagues.ts`), unit-tested on its own.
+- **Sports come from the API, not a hardcoded list.** `groupLeaguesBySport` groups the leagues by `strSport`, and both the sport dropdown (each sport with its league count, e.g. "Soccer (n)") and the results (one section per sport) are built from it. So every option has leagues behind it, and a new sport in the API shows up with no code change. A league without a sport is grouped under "Other". The brief's examples (Basketball, Motorsport) appear whenever the API returns them.
+- `useLeagueResults` filters the cached data, then groups it by sport. Sports are A–Z; leagues keep the API's order inside each sport.
+- Filtering and grouping are pure functions (`filter-leagues.ts`, `group-leagues-by-sport.ts`), unit-tested on their own.
+- The empty state offers "Clear filters" only when a filter is applied. If the API returns no leagues at all, it just says so.
 
 ## API notes
 
-- The free API key (`3`) returns a **limited dataset: 10 leagues, all Soccer, without `strLeagueAlternate`** (TheSportsDB documents a free limit of 10 for `all_leagues.php`). The UI handles the missing field ("No alternate name"). Tests use a richer mock dataset to cover the full behavior.
+- The free API key (`3`) returns a **limited sample** of leagues (TheSportsDB limits free-key results). It changes over time, so the app assumes nothing about its size or which sports it contains, and handles a missing `strLeagueAlternate` ("No alternate name"). Tests use a richer mock dataset to cover the full behavior.
+- Text fields the app relies on (`strLeague`, `strSport`) are typed as nullable and normalized defensively, so one incomplete row can't break the whole list.
 - Responses are typed with TypeScript but not validated at runtime. For production I'd add schema validation (e.g. zod) at the API boundary.
 - A small `fetch` wrapper is used instead of axios: the app only needs GET, timeouts (`AbortSignal.timeout`) and typed errors, which `fetch` covers without the extra dependency.
 
@@ -46,25 +49,26 @@ Why not Redux or Context: Redux Toolkit is a lot of setup for three values. Cont
 - **Light and dark themes** in a SportyBet-inspired palette (brand red `#EC1C24`). Colors are CSS variables switched by `data-theme` on `<html>`. The first visit follows the OS setting, and the user's choice is saved. An inline script in `index.html` applies the theme before the first paint, so there's no flash.
 - **Contrast:** buttons use a darker red (`#C9141B`, 5.9:1 with white) because the brand red is just under the 4.5:1 minimum for normal-size text. The bright red is kept for large text and accents.
 - **Building blocks:** generic UI pieces (Button, Chip, SearchField, Select, Dialog, Carousel, Skeleton, StateMessage) are composed into league-specific components. Radix UI provides the accessible behavior for the dropdown and dialog; Embla provides swipe for the carousel.
-- **Responsive:** 1-column grid on phones, then 2 and 3 columns. Filters stack on mobile. The seasons dialog is a bottom sheet on mobile and a centered dialog from tablet up. Touch targets are at least 44 px.
-- **Performance:** the dialog and carousel code is its own ~15 KB chunk, downloaded only when a league card is hovered, focused or opened. Badges on slides other than the first use `loading="lazy"`.
+- **Responsive:** 1-column grid on phones, then 2 and 3 columns. Filters stack on mobile. The seasons dialog is centered on every screen: 16 px from the screen edges on phones, scrolling inside itself if the screen is short, and the badge shrinks to fit landscape phones. Touch targets are at least 44 px.
+- **Performance:** the dialog and carousel code is its own chunk (~15 KB gzipped), downloaded only when a league card is hovered, focused or opened. Badges on slides other than the first use `loading="lazy"`.
 
 ## Component tree
 
-The leagues page is composed from small single-purpose components (generic pieces from `src/components`, league pieces from `src/features/leagues/components`):
+The leagues page is composed from small single-purpose components (generic pieces from `src/components`, league pieces from `src/features/leagues/components`). League components are grouped by screen area: `filters/`, `results/`, `seasons-dialog/` and `season-carousel/`, so a new piece goes next to the ones it sits beside on screen:
 
 ```
 LeaguesPage
 ├── PageHeader
-├── LeagueFilters ............ search landmark
+├── LeagueFilters ............ search landmark (toolbar)
 │   ├── LeagueSearch → SearchField
 │   └── SportSelect → Select (Radix)
-├── LeagueResults ............ loading / error / empty / list
+├── LeagueResults ............ loading / error / empty / sections per sport
 │   ├── LeagueListSkeleton
 │   ├── LeagueResultsError → StateMessage
-│   ├── LeagueResultsCount (aria-live)
+│   ├── LeagueResultsCount ..... screen readers only (aria-live)
 │   ├── LeagueResultsEmpty → StateMessage
-│   └── LeagueList → LeagueCard → Chip
+│   └── LeagueSportGroups ...... one section per sport
+│       └── LeagueList → LeagueCard → Chip
 └── LazyLeagueSeasonsDialog .. loaded on first open
     └── LeagueSeasonsDialog → Dialog (Radix)
         ├── LeagueSeasonsHeader
@@ -80,14 +84,14 @@ LeaguesPage
 - **Keyboard:** everything is reachable with Tab, with visible focus rings. A "Skip to content" link is the first focusable element.
 - **Dropdown:** Radix Select (arrow keys, type-ahead, Esc).
 - **Dialog:** focus moves into it and is trapped while open; Esc or the close button closes it; focus returns to the league card that opened it.
-- **Carousel:** follows the WAI-ARIA "tabbed carousel" pattern. The season timeline is a tablist (arrow keys, Home, End), each slide is its tab panel, and the selected tab scrolls into view. Changes from the previous/next buttons or a swipe are announced ("Season 1993-1994, 2 of 5"); tab changes aren't repeated, because the focused tab is already read out.
+- **Carousel:** follows the WAI-ARIA "tabbed carousel" pattern. The season timeline is a tablist (arrow keys, Home, End), each slide is its tab panel, and the selected tab scrolls into view (only the timeline scrolls, never the dialog). Each tab's name contains its visible text ("Season 1992–93", with "Season" for screen readers only), so voice-control users can say what they see. Changes from the previous/next buttons or a swipe are announced ("Season 1993-1994, 2 of 5"); tab changes aren't repeated, because the focused tab is already read out.
 - **No lost focus:** buttons that become unavailable while focused (previous/next at either end, "Try again" while retrying) use `aria-disabled` instead of `disabled`, so they stay focusable.
-- **Screen readers:** labelled controls, result count announced as it changes (`aria-live`, the only announcement for an empty result), loading states use `role="status"`, errors use `role="alert"`, decorative icons are hidden.
+- **Screen readers:** labelled controls, result count announced as it changes (`aria-live`, visually hidden since each sport heading shows its count; the only announcement for an empty result), loading states use `role="status"`, errors use `role="alert"`, decorative icons are hidden.
 - **Motion:** all animations are switched off for users who prefer reduced motion.
 
 ## Errors and routing
 
-- **React Router** with two routes: `/` (leagues) and `*` (404 page).
+- **React Router** with two routes: `/` (leagues) and `*` (404 page). Tab titles are built from `VITE_APP_NAME` (`pageTitle`).
 - **Route error boundary** (`errorElement`): any error thrown while rendering a page shows the error page with "Reload page" and "Back to leagues". In development it also shows the error message.
 - **Top-level error boundary** (`react-error-boundary`): catches errors outside the router, such as in providers.
 - API errors are not page crashes: they're shown in place with a "Try again" button.
@@ -96,15 +100,17 @@ LeaguesPage
 
 Vitest + React Testing Library, with **MSW** mocking the API at the network level, so tests run the real fetch → query → component path.
 
-- **Unit:** filtering, sport options, season normalizing, badge image URLs, season formatting, the Zustand store, `useDebounce`, the API client, the theme toggle, the search field.
-- **Integration (`LeaguesPage.test.tsx`):** loading → list, error → retry, debounced search, sport filter including an empty sport and "Clear filters", dialog content, carousel buttons, keyboard tabs (arrows, Home, End), null-badge placeholders, focus returning to the card, and **seasons served from cache on reopen (exactly one request)**.
+- **Unit:** filtering, grouping by sport, sport options, league and season normalizing, badge image URLs, season formatting, the Zustand store, `useDebounce`, the API client, the theme toggle, the search field.
+- **Integration (`LeaguesPage.test.tsx`):** loading → list, error → retry, empty API response, debounced search, sport options from the API with counts, sport filter, sections per sport, "Clear filters", dialog content, carousel buttons, keyboard tabs (arrows, Home, End), null-badge placeholders, focus returning to the card, and **seasons served from cache on reopen (exactly one request)**.
 - **Routing:** home page, 404 page and its "Back to leagues" link, and the error page for a crashing route.
 
 ## Types and constants
 
 - **DTOs vs app types:** `features/leagues/types/league.dto.ts` holds the exact API response shapes (`ILeagueDto`, `ISeasonsResponseDto`…). They're only used at the API boundary and mapped to the app's types (`ILeague`, `ISeason` in `league.ts`) by `normalizeLeagues` / `normalizeSeasons`. Components never see raw API data.
 - **Naming:** object shapes (DTOs, component props, store state) are `interface`s with an `I` prefix (`ILeagueCardProps`); unions and aliases stay `type` (`type Theme = 'light' | 'dark'`). Every component has a named props interface. Both rules are enforced by ESLint.
-- **No hardcoded API details:** the base URL comes from `.env` (`VITE_API_URL`, validated in `src/config/env.ts`). Endpoint paths, query parameter names, image sizes and the JSON content type live in `src/constants/api.ts`. Feature-level values (default sports, debounce delay) live in `features/leagues/constants.ts`. An ESLint rule fails the build if a URL literal appears in app code.
+- **Generic components:** shared components that take a list of values are generic over the value type. `Select<TValue>` can be used with a union (e.g. `ISelectOption<'asc' | 'desc'>[]`), so `onChange` receives that exact type and a wrong option value is a compile error. It maps Radix's plain string back to the typed option instead of casting.
+- **Public APIs (`index.ts`):** `@/components`, `@/hooks` and each feature (`@/features/leagues`) are imported through their `index.ts`, so a page needs one import line per module. A feature's index exports only what pages use (its three top-level components); the rest of the feature stays internal. Files inside a module import each other directly, which keeps the index files free of cycles. ESLint enforces both. Test setup and mocks may use feature internals to build fixtures. `package.json` declares `sideEffects` (only CSS and `main.tsx`), so the bundler can still drop unused re-exports: without it, the barrel pulled the dialog and carousel code into the main bundle.
+- **No hardcoded API details:** the base URL comes from `.env` (`VITE_API_URL`, validated in `src/config/env.ts`). Endpoint paths, query parameter names, image sizes and the JSON content type live in `src/constants/api.ts`. Feature-level values (the "all sports" value, the fallback sport name, the debounce delay) live in `features/leagues/constants.ts`. An ESLint rule fails the build if a URL literal appears in app code.
 
 ## Tooling
 

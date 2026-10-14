@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 
-import { Chip } from '@/components/ui/Chip';
-import { loadLeagueSeasonsDialog } from '@/features/leagues/components/seasons-dialog-loader';
+import { Chip } from '@/components';
+import { loadLeagueSeasonsDialog } from '@/features/leagues/components/seasons-dialog/seasons-dialog-loader';
 import { useLeaguesUiStore } from '@/features/leagues/store/leagues-ui.store';
 import type { ILeague } from '@/features/leagues/types/league';
 import { getLeagueCardId } from '@/features/leagues/utils/league-card-id';

@@ -1,4 +1,4 @@
-import { SeasonBadgeImage } from '@/features/leagues/components/SeasonBadgeImage';
+import { SeasonBadgeImage } from '@/features/leagues/components/season-carousel/SeasonBadgeImage';
 import type { ISeason } from '@/features/leagues/types/league';
 import { formatSeason } from '@/features/leagues/utils/format-season';
 
@@ -13,7 +13,7 @@ interface ISeasonSlideProps {
 export const SeasonSlide = ({ season, leagueName, isFirst }: ISeasonSlideProps) => (
   <div className="flex flex-col items-center gap-4 px-2 pt-2">
     <SeasonBadgeImage season={season} leagueName={leagueName} eager={isFirst} />
-    <p className="font-display text-5xl leading-none font-bold tabular-nums md:text-6xl">
+    <p className="font-display text-4xl leading-none font-bold tabular-nums sm:text-5xl md:text-6xl">
       {formatSeason(season.name)}
     </p>
   </div>

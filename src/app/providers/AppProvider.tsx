@@ -3,7 +3,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { AppErrorFallback } from '@/app/AppErrorFallback';
-import { useThemeSync } from '@/hooks/useThemeSync';
+import { useThemeSync } from '@/hooks';
 import { createQueryClient } from '@/lib/query-client';
 
 import type { ReactNode } from 'react';

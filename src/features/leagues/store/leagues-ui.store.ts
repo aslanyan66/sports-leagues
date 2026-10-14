@@ -12,6 +12,7 @@ interface ILeaguesUiState extends ILeagueFilterValues {
   clearFilters: () => void;
   openSeasonsDialog: (leagueId: string) => void;
   closeSeasonsDialog: () => void;
+  /** Back to the initial state. Used between tests, so one test's state can't leak into the next. */
   reset: () => void;
 }
 

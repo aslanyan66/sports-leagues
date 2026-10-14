@@ -1,4 +1,4 @@
-import { LeagueCard } from '@/features/leagues/components/LeagueCard';
+import { LeagueCard } from '@/features/leagues/components/results/LeagueCard';
 import type { ILeague } from '@/features/leagues/types/league';
 
 interface ILeagueListProps {

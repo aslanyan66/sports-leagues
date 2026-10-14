@@ -1,30 +1,53 @@
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
 import { Select as SelectPrimitive } from 'radix-ui';
 import { useId } from 'react';
 
-export interface ISelectOption {
-  value: string;
+/** `TValue` narrows the values to a union (e.g. `'asc' | 'desc'`) when needed; defaults to any string. */
+export interface ISelectOption<TValue extends string = string> {
+  value: TValue;
   label: string;
 }
 
-interface ISelectProps {
+interface ISelectProps<TValue extends string> {
   label: string;
-  value: string;
-  options: ISelectOption[];
-  onChange: (value: string) => void;
+  /** Decorative icon shown before the label. */
+  icon?: LucideIcon;
+  value: TValue;
+  options: readonly ISelectOption<TValue>[];
+  onChange: (value: TValue) => void;
   disabled?: boolean;
 }
 
-/** Accessible, animated dropdown (Radix Select): full keyboard support, type-ahead, screen-reader labels. */
-export const Select = ({ label, value, options, onChange, disabled = false }: ISelectProps) => {
+/**
+ * Accessible, animated dropdown (Radix Select): full keyboard support, type-ahead, screen-reader labels.
+ * Generic over the value type, so `onChange` receives exactly the type of the options passed in.
+ */
+export const Select = <TValue extends string>({
+  label,
+  icon: Icon,
+  value,
+  options,
+  onChange,
+  disabled = false,
+}: ISelectProps<TValue>) => {
   const labelId = useId();
+
+  // Radix reports a plain string; map it back to the typed option instead of casting.
+  const handleValueChange = (next: string) => {
+    const option = options.find((item) => item.value === next);
+
+    if (option) {
+      onChange(option.value);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span id={labelId} className="text-sm font-medium text-fg-muted">
+      <span id={labelId} className="flex items-center gap-1.5 text-sm font-medium text-fg-muted">
+        {Icon ? <Icon aria-hidden="true" className="size-4 shrink-0" /> : null}
         {label}
       </span>
-      <SelectPrimitive.Root value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectPrimitive.Root value={value} onValueChange={handleValueChange} disabled={disabled}>
         <SelectPrimitive.Trigger
           aria-labelledby={labelId}
           className="group flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-border-strong bg-surface px-3 text-left text-base text-fg transition-colors hover:border-fg-muted disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-fg"

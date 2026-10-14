@@ -13,6 +13,8 @@ I used Claude Code, an AI coding assistant running in the terminal, as a pair pr
 - **Accessibility:** helped apply WAI-ARIA patterns (tabbed carousel, dialog focus management) and caught a focus-return bug through tests.
 - **API investigation:** checked the live API responses and docs, which surfaced that the free key returns a limited dataset (10 Soccer leagues, no `strLeagueAlternate`) and that some seasons have no badge, so the UI handles both.
 - **Tests:** wrote the Vitest/RTL/MSW test suite, including a test proving badge responses are cached.
+- **Refactoring:** reorganized the code as requirements changed: component folders by screen area, `index.ts` public APIs, a generic `Select`, sports built from the API instead of a fixed list, and removing features I decided against (sorting and a "group by" dropdown).
+- **Review:** reviewed the code for leftovers and edge cases (e.g. dead helpers, an empty state offering a "Clear filters" that did nothing) and kept these docs in sync.
 
 **What I did**
 

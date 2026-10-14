@@ -4,9 +4,9 @@ import {
   CarouselControls,
   CarouselSlide,
   CarouselViewport,
-} from '@/components/ui/Carousel';
-import { SeasonSlide } from '@/features/leagues/components/SeasonSlide';
-import { SeasonYearNav } from '@/features/leagues/components/SeasonYearNav';
+} from '@/components';
+import { SeasonSlide } from '@/features/leagues/components/season-carousel/SeasonSlide';
+import { SeasonYearNav } from '@/features/leagues/components/season-carousel/SeasonYearNav';
 import type { ISeason } from '@/features/leagues/types/league';
 
 interface ISeasonCarouselProps {

@@ -4,8 +4,9 @@
 /** One item of `all_leagues.php` → `leagues[]`. */
 export interface ILeagueDto {
   idLeague: string;
-  strLeague: string;
-  strSport: string;
+  /** Typed as nullable: the public API's data isn't guaranteed, and one bad row mustn't break the list. */
+  strLeague: string | null;
+  strSport: string | null;
   /** Listed in the task, but not returned by all_leagues.php on the free API key. */
   strLeagueAlternate?: string | null;
 }

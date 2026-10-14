@@ -1,13 +1,13 @@
 import { House } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { ErrorScreen } from '@/components/feedback/ErrorScreen';
-import { buttonVariants } from '@/components/ui/button-variants';
+import { ErrorScreen, buttonVariants } from '@/components';
 import { ROUTES } from '@/constants/routes';
+import { pageTitle } from '@/utils/page-title';
 
 export const NotFoundPage = () => (
   <>
-    <title>Page not found · Sports Leagues</title>
+    <title>{pageTitle('Page not found')}</title>
     <ErrorScreen
       code="404"
       title="This page doesn't exist"

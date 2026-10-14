@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 
-import { loadLeagueSeasonsDialog } from '@/features/leagues/components/seasons-dialog-loader';
+import { loadLeagueSeasonsDialog } from '@/features/leagues/components/seasons-dialog/seasons-dialog-loader';
 import { useLeaguesUiStore } from '@/features/leagues/store/leagues-ui.store';
 
 const LeagueSeasonsDialog = lazy(async () => {

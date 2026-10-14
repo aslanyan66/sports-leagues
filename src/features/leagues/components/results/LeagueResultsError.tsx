@@ -1,7 +1,6 @@
 import { CircleAlert, RefreshCw } from 'lucide-react';
 
-import { StateMessage } from '@/components/feedback/StateMessage';
-import { Button } from '@/components/ui/Button';
+import { StateMessage, Button } from '@/components';
 
 interface ILeagueResultsErrorProps {
   isRetrying: boolean;

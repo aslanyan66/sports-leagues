@@ -1,9 +1,7 @@
 import { CalendarX2, CircleAlert, RefreshCw } from 'lucide-react';
 
-import { StateMessage } from '@/components/feedback/StateMessage';
-import { Button } from '@/components/ui/Button';
-import { Spinner } from '@/components/ui/Spinner';
-import { SeasonCarousel } from '@/features/leagues/components/SeasonCarousel';
+import { StateMessage, Button, Spinner } from '@/components';
+import { SeasonCarousel } from '@/features/leagues/components/season-carousel/SeasonCarousel';
 import { useSeasons } from '@/features/leagues/hooks/useSeasons';
 
 interface ILeagueSeasonsProps {

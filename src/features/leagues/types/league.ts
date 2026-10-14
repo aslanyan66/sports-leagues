@@ -15,6 +15,12 @@ export interface ISeason {
   badgeUrl: string | null;
 }
 
+/** Leagues of one sport (grouped by `strSport`). */
+export interface ILeagueSportGroup {
+  sport: string;
+  leagues: ILeague[];
+}
+
 export interface ILeagueFilterValues {
   search: string;
   /** null = all sports */

@@ -1,4 +1,4 @@
-import { SearchField } from '@/components/ui/SearchField';
+import { SearchField } from '@/components';
 import { useLeaguesUiStore } from '@/features/leagues/store/leagues-ui.store';
 
 export const LeagueSearch = () => {

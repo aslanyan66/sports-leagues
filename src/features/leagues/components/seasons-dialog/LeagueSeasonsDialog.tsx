@@ -1,6 +1,6 @@
-import { Dialog, DialogContent } from '@/components/ui/Dialog';
-import { LeagueSeasons } from '@/features/leagues/components/LeagueSeasons';
-import { LeagueSeasonsHeader } from '@/features/leagues/components/LeagueSeasonsHeader';
+import { Dialog, DialogContent } from '@/components';
+import { LeagueSeasons } from '@/features/leagues/components/seasons-dialog/LeagueSeasons';
+import { LeagueSeasonsHeader } from '@/features/leagues/components/seasons-dialog/LeagueSeasonsHeader';
 import { useLeague } from '@/features/leagues/hooks/useLeague';
 import { useLeaguesUiStore } from '@/features/leagues/store/leagues-ui.store';
 import { getLeagueCardId } from '@/features/leagues/utils/league-card-id';
@@ -32,7 +32,7 @@ export const LeagueSeasonsDialog = () => {
           }}
         >
           <LeagueSeasonsHeader league={league} />
-          <div className="px-5 pt-4 pb-6 md:px-6">
+          <div className="px-4 pt-4 pb-5 sm:px-5 sm:pb-6 md:px-6">
             <LeagueSeasons leagueId={league.idLeague} leagueName={league.strLeague} />
           </div>
         </DialogContent>

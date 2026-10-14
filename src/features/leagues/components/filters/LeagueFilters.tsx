@@ -1,5 +1,5 @@
-import { LeagueSearch } from '@/features/leagues/components/LeagueSearch';
-import { SportSelect } from '@/features/leagues/components/SportSelect';
+import { LeagueSearch } from '@/features/leagues/components/filters/LeagueSearch';
+import { SportSelect } from '@/features/leagues/components/filters/SportSelect';
 
 /** Filters section: name search + sport dropdown. Stacked on mobile, side by side from `md`. */
 export const LeagueFilters = () => (

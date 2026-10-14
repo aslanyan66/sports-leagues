@@ -9,10 +9,14 @@ import { renderWithProviders } from '@/testing/test-utils';
 
 const leagueButton = (name: RegExp) => screen.findByRole('button', { name });
 
-const getCardNames = () =>
-  within(screen.getByRole('list'))
+// Cards across every sport section, in page order.
+const getCardNames = (container: HTMLElement = document.body) =>
+  within(container)
     .getAllByRole('listitem')
     .map((item) => item.textContent);
+
+const sportSection = (sport: string) =>
+  screen.getByRole('region', { name: new RegExp(`^${sport}`) });
 
 describe('LeaguesPage: list and filters', () => {
   it('shows a loading state, then the leagues with sport and alternate name', async () => {
@@ -43,6 +47,17 @@ describe('LeaguesPage: list and filters', () => {
     expect(await leagueButton(/English Premier League/)).toBeVisible();
   });
 
+  it('says so when the API returns no leagues, without a pointless "Clear filters"', async () => {
+    server.use(
+      http.get(ALL_LEAGUES_URL, () => HttpResponse.json({ leagues: null }), { once: true }),
+    );
+    renderWithProviders(<LeaguesPage />);
+
+    expect(await screen.findByText('No leagues found')).toBeInTheDocument();
+    expect(screen.getByText('There are no leagues yet.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
+  });
+
   it('filters by name (debounced)', async () => {
     const { user } = renderWithProviders(<LeaguesPage />);
     await leagueButton(/English Premier League/);
@@ -52,7 +67,8 @@ describe('LeaguesPage: list and filters', () => {
     await waitFor(() => {
       expect(getCardNames()).toHaveLength(1);
     });
-    expect(screen.getByText('1 league')).toBeInTheDocument();
+    // The total count (a <p>), not the "1 league" in the sport heading.
+    expect(screen.getByText('1 league', { selector: 'p' })).toBeInTheDocument();
   });
 
   it('describes the applied search in the empty state, and clearing applies immediately', async () => {
@@ -71,32 +87,40 @@ describe('LeaguesPage: list and filters', () => {
     expect(screen.getByRole('searchbox', { name: 'League name' })).toHaveValue('');
   });
 
-  it('offers default sports, filters by sport, and shows an empty state for sports with no leagues', async () => {
+  it('offers only sports from the API, with counts, and filters by sport', async () => {
     const { user } = renderWithProviders(<LeaguesPage />);
     await leagueButton(/English Premier League/);
 
     await user.click(screen.getByRole('combobox', { name: 'Sport' }));
     expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
       'All sports',
-      'Basketball',
-      'Motorsport',
-      'Soccer',
+      'Motorsport (1)',
+      'Soccer (3)',
     ]);
 
-    await user.click(screen.getByRole('option', { name: 'Motorsport' }));
+    await user.click(screen.getByRole('option', { name: 'Motorsport (1)' }));
     expect(getCardNames()).toHaveLength(1);
     expect(screen.getByRole('button', { name: /Formula 1/ })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /^Soccer/ })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('combobox', { name: 'Sport' }));
-    await user.click(screen.getByRole('option', { name: 'Basketball' }));
-
-    expect(screen.getByText('No leagues found')).toBeInTheDocument();
-    expect(screen.getByText(/There are no Basketball leagues/)).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    await user.click(screen.getByRole('option', { name: 'All sports' }));
 
     expect(screen.getByText('4 leagues')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Sport' })).toHaveTextContent('All sports');
+  });
+
+  it('groups the leagues by sport into labelled sections, sports A–Z', async () => {
+    renderWithProviders(<LeaguesPage />);
+    await leagueButton(/English Premier League/);
+
+    expect(
+      screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent),
+    ).toEqual(['Motorsport1 league', 'Soccer3 leagues']);
+    expect(within(sportSection('Motorsport')).getByRole('heading', { level: 3 })).toHaveTextContent(
+      'Motorsport1 league',
+    );
+    expect(getCardNames(sportSection('Soccer'))).toHaveLength(3);
+    expect(getCardNames()[0]).toContain('Formula 1');
   });
 });
 
@@ -115,7 +139,7 @@ describe('LeaguesPage: season badges dialog', () => {
       'src',
       'https://example.com/epl-1992.png/small',
     );
-    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992-1993' })).toBeVisible();
+    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992–93' })).toBeVisible();
     // Nothing is announced on open: the dialog title and description are read instead.
     expect(within(dialog).getByText('1 / 3')).toBeInTheDocument();
   });
@@ -134,7 +158,7 @@ describe('LeaguesPage: season badges dialog', () => {
 
     await user.click(next);
     expect(within(dialog).getByText('Season 1993-1994, 2 of 3')).toBeInTheDocument();
-    expect(within(dialog).getByRole('tab', { name: 'Season 1993-1994' })).toHaveAttribute(
+    expect(within(dialog).getByRole('tab', { name: 'Season 1993–94' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
@@ -144,7 +168,7 @@ describe('LeaguesPage: season badges dialog', () => {
     expect(next).toHaveFocus();
 
     await user.click(next);
-    expect(within(dialog).getByRole('tab', { name: 'Season 1994-1995' })).toHaveAttribute(
+    expect(within(dialog).getByRole('tab', { name: 'Season 1994–95' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
@@ -159,10 +183,15 @@ describe('LeaguesPage: season badges dialog', () => {
 
     const tablist = within(dialog).getByRole('tablist', { name: 'Seasons' });
     const tabs = within(tablist).getAllByRole('tab');
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['1992–93', '1993–94', '1994–95']);
+    // Visible text is the short season; "Season " is added for screen readers only.
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      'Season 1992–93',
+      'Season 1993–94',
+      'Season 1994–95',
+    ]);
     expect(tabs[0]).toHaveAttribute('tabindex', '0');
     expect(tabs[1]).toHaveAttribute('tabindex', '-1');
-    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992-1993' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992–93' })).toBeInTheDocument();
 
     tabs[0]?.focus();
     await user.keyboard('{ArrowRight}');
@@ -197,7 +226,7 @@ describe('LeaguesPage: season badges dialog', () => {
 
     fireEvent.error(original);
     expect(within(dialog).queryByRole('img', { name: /season 1992-1993/ })).not.toBeInTheDocument();
-    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992-1993' })).toHaveTextContent(
+    expect(within(dialog).getByRole('tabpanel', { name: 'Season 1992–93' })).toHaveTextContent(
       'No badge for this season',
     );
   });

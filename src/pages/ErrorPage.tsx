@@ -1,31 +1,28 @@
 import { House, RotateCw } from 'lucide-react';
-import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
+import { Link, useRouteError } from 'react-router';
 
-import { ErrorScreen } from '@/components/feedback/ErrorScreen';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { renderRouterHomeLink } from '@/components/layout/router-home-link';
-import { Button } from '@/components/ui/Button';
-import { buttonVariants } from '@/components/ui/button-variants';
+import {
+  ErrorScreen,
+  MainLayout,
+  renderRouterHomeLink,
+  Button,
+  buttonVariants,
+} from '@/components';
 import { env } from '@/config/env';
 import { ROUTES } from '@/constants/routes';
-import { NotFoundPage } from '@/pages/NotFoundPage';
 import { getErrorMessage } from '@/utils/error';
+import { pageTitle } from '@/utils/page-title';
 
-/** Route-level error boundary page: shown when anything throws while rendering a route. */
+/**
+ * Route-level error boundary page: shown when anything throws while rendering a route.
+ * Unknown URLs never get here: the `*` route renders the 404 page instead.
+ */
 export const ErrorPage = () => {
   const error = useRouteError();
 
-  if (isRouteErrorResponse(error) && error.status === 404) {
-    return (
-      <MainLayout renderHomeLink={renderRouterHomeLink}>
-        <NotFoundPage />
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout renderHomeLink={renderRouterHomeLink}>
-      <title>Something went wrong · Sports Leagues</title>
+      <title>{pageTitle('Something went wrong')}</title>
       <ErrorScreen
         code="500"
         title="Something went wrong"

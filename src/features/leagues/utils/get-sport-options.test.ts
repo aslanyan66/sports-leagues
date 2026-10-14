@@ -4,28 +4,23 @@ import { getSportOptions } from '@/features/leagues/utils/get-sport-options';
 import { mockLeagues } from '@/testing/mocks/data';
 
 describe('getSportOptions', () => {
-  it('merges the default sports with sports from the data, sorted and unique', () => {
-    expect(getSportOptions(mockLeagues)).toEqual(['Basketball', 'Motorsport', 'Soccer']);
+  it('offers only sports from the data, A–Z, with league counts', () => {
+    expect(getSportOptions(mockLeagues)).toEqual([
+      { sport: 'Motorsport', count: 1 },
+      { sport: 'Soccer', count: 3 },
+    ]);
   });
 
-  it('adds sports that are not in the defaults', () => {
+  it('adds any new sport the API returns', () => {
     expect(
       getSportOptions([
+        ...mockLeagues,
         { idLeague: '1', strLeague: 'NHL', strSport: 'Ice Hockey', strLeagueAlternate: null },
-      ]),
-    ).toEqual(['Basketball', 'Ice Hockey', 'Motorsport', 'Soccer']);
+      ]).map((option) => option.sport),
+    ).toEqual(['Ice Hockey', 'Motorsport', 'Soccer']);
   });
 
-  it('skips empty sports', () => {
-    expect(
-      getSportOptions([
-        { idLeague: '1', strLeague: 'A', strSport: 'Soccer', strLeagueAlternate: null },
-        { idLeague: '2', strLeague: 'B', strSport: '', strLeagueAlternate: null },
-      ]),
-    ).toEqual(['Basketball', 'Motorsport', 'Soccer']);
-  });
-
-  it('still offers the default sports when there are no leagues', () => {
-    expect(getSportOptions([])).toEqual(['Basketball', 'Motorsport', 'Soccer']);
+  it('offers no sports when there are no leagues', () => {
+    expect(getSportOptions([])).toEqual([]);
   });
 });

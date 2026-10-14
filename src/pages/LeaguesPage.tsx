@@ -1,12 +1,11 @@
-import { PageHeader } from '@/components/layout/PageHeader';
-import { LazyLeagueSeasonsDialog } from '@/features/leagues/components/LazyLeagueSeasonsDialog';
-import { LeagueFilters } from '@/features/leagues/components/LeagueFilters';
-import { LeagueResults } from '@/features/leagues/components/LeagueResults';
+import { PageHeader } from '@/components';
+import { LazyLeagueSeasonsDialog, LeagueFilters, LeagueResults } from '@/features/leagues';
+import { pageTitle } from '@/utils/page-title';
 
 /** Composes the leagues feature: header → filters → results → seasons dialog. */
 export const LeaguesPage = () => (
   <div className="flex flex-col gap-5 md:gap-6">
-    <title>Sports Leagues</title>
+    <title>{pageTitle()}</title>
     <PageHeader
       title="Sports leagues"
       description="Search by name or filter by sport. Open a league to browse its season badges."

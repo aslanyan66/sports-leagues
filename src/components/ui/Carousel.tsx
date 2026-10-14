@@ -122,27 +122,39 @@ export const CarouselSlide = ({ index, children }: ICarouselSlideProps) => {
 
 interface ICarouselTabsProps {
   label: string;
-  /** Accessible name of each tab, e.g. "Season 1992-1993". */
-  getTabLabel: (index: number) => string;
-  /** Visible content of each tab. */
+  /**
+   * Content of each tab, which is also its accessible name. Add context for screen readers with
+   * `sr-only` text (e.g. "Season ") so the visible text stays part of the name (WCAG 2.5.3).
+   */
   renderTab: (index: number, isSelected: boolean) => ReactNode;
   className?: string;
   tabClassName?: (isSelected: boolean) => string;
 }
 
-export const CarouselTabs = ({
-  label,
-  getTabLabel,
-  renderTab,
-  className,
-  tabClassName,
-}: ICarouselTabsProps) => {
+export const CarouselTabs = ({ label, renderTab, className, tabClassName }: ICarouselTabsProps) => {
   const { selectedIndex, count, goTo, getSlideId, getTabId } = useCarousel();
+  const listRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // The tablist scrolls horizontally: keep the selected tab visible after swipes and button presses.
+  // Only the tablist is scrolled. `scrollIntoView` would also scroll every scrollable parent,
+  // pulling a tall dialog down to the tablist on short screens.
   useEffect(() => {
-    tabRefs.current[selectedIndex]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const list = listRef.current;
+    const tab = tabRefs.current[selectedIndex];
+
+    if (!list || !tab) {
+      return;
+    }
+
+    const tabStart = tab.offsetLeft;
+    const tabEnd = tabStart + tab.offsetWidth;
+
+    if (tabStart < list.scrollLeft) {
+      list.scrollLeft = tabStart;
+    } else if (tabEnd > list.scrollLeft + list.clientWidth) {
+      list.scrollLeft = tabEnd - list.clientWidth;
+    }
   }, [selectedIndex]);
 
   const selectAndFocus = (index: number) => {
@@ -175,7 +187,8 @@ export const CarouselTabs = ({
   };
 
   return (
-    <div role="tablist" aria-label={label} className={className}>
+    // `relative` makes the tabs' offsetLeft relative to the tablist itself.
+    <div ref={listRef} role="tablist" aria-label={label} className={cn('relative', className)}>
       {Array.from({ length: count }, (_, index) => {
         const isSelected = index === selectedIndex;
 
@@ -189,7 +202,6 @@ export const CarouselTabs = ({
             type="button"
             role="tab"
             id={getTabId(index)}
-            aria-label={getTabLabel(index)}
             aria-selected={isSelected}
             aria-controls={getSlideId(index)}
             tabIndex={isSelected ? 0 : -1}

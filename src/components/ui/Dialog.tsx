@@ -16,7 +16,8 @@ interface IDialogContentProps {
 }
 
 /**
- * Bottom sheet on mobile, centered dialog from `md` up.
+ * Centered dialog on every screen size: 1rem from the screen edges on phones, up to `max-w-xl`
+ * wide from tablets up. Content taller than the screen scrolls inside the dialog.
  * Radix traps focus inside, closes on Esc/overlay click and returns focus to the trigger
  * (or wherever `onCloseAutoFocus` sends it when the dialog is opened without a Radix trigger).
  */
@@ -31,17 +32,12 @@ export const DialogContent = ({
     <DialogPrimitive.Content
       onCloseAutoFocus={onCloseAutoFocus}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col overflow-y-auto rounded-t-2xl border border-border bg-surface text-fg shadow-2xl',
-        'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom',
-        'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:w-full md:max-w-xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl',
-        'md:data-[state=closed]:fade-out-0 md:data-[state=closed]:slide-out-to-bottom-0 md:data-[state=closed]:zoom-out-95 md:data-[state=open]:fade-in-0 md:data-[state=open]:slide-in-from-bottom-0 md:data-[state=open]:zoom-in-95',
+        // inset-0 + m-auto + h-fit centers it without transforms, which the zoom animation uses.
+        'fixed inset-0 z-50 m-auto flex h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl flex-col overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface text-fg shadow-2xl',
+        'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-border md:hidden"
-      />
       {children}
       <DialogPrimitive.Close
         aria-label={closeLabel}

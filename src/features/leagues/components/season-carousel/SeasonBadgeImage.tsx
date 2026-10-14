@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { SeasonBadgePlaceholder } from '@/features/leagues/components/SeasonBadgePlaceholder';
+import { SeasonBadgePlaceholder } from '@/features/leagues/components/season-carousel/SeasonBadgePlaceholder';
 import type { ISeason } from '@/features/leagues/types/league';
 import { getBadgeImageSources } from '@/features/leagues/utils/badge-image';
 import { cn } from '@/utils/cn';
@@ -25,7 +25,7 @@ export const SeasonBadgeImage = ({ season, leagueName, eager = false }: ISeasonB
   const showImage = sources !== null && attempt !== 'failed';
 
   return (
-    <div className="flex aspect-square w-full max-w-64 items-center justify-center rounded-full bg-spotlight p-8">
+    <div className="flex aspect-square w-full max-w-[min(16rem,45dvh)] items-center justify-center rounded-full bg-spotlight p-6 sm:p-8">
       {showImage ? (
         <img
           // New element per attempt, so the browser drops the failed request and its srcset.

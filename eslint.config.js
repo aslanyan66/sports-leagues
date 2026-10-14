@@ -31,6 +31,66 @@ const FEATURES = readdirSync('./src/features', { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
+const PARENT_IMPORT_MESSAGE = 'Use the "@/" alias instead of parent-relative imports.';
+
+// Modules with a public API (index.ts). Outside a module, import "@/<module>"; inside it, import
+// files directly, since going through its own index.ts creates import cycles.
+const PUBLIC_API_MODULES = [
+  'components',
+  'hooks',
+  ...FEATURES.map((feature) => `features/${feature}`),
+];
+const parentImportPattern = { group: ['../*'], message: PARENT_IMPORT_MESSAGE };
+const deepImportPattern = (module) => ({
+  group: [`@/${module}/*`],
+  message: `Import from "@/${module}" (its public API), not from a file inside it.`,
+});
+
+const publicApiConfigs = [
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [parentImportPattern, ...PUBLIC_API_MODULES.map(deepImportPattern)] },
+      ],
+    },
+  },
+  ...PUBLIC_API_MODULES.map((module) => ({
+    files: [`src/${module}/**/*.{ts,tsx}`],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: `@/${module}`, message: `Inside src/${module}, import the file directly.` },
+          ],
+          patterns: [
+            parentImportPattern,
+            ...PUBLIC_API_MODULES.filter((other) => other !== module).map(deepImportPattern),
+          ],
+        },
+      ],
+    },
+  })),
+  // Test setup and mocks build fixtures from feature internals (types, normalizers, store).
+  {
+    files: ['src/testing/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            parentImportPattern,
+            deepImportPattern('components'),
+            deepImportPattern('hooks'),
+          ],
+        },
+      ],
+    },
+  },
+];
+
 const architectureZones = [
   // Features must not import from other features; compose them in pages/app instead.
   ...FEATURES.map((feature) => ({
@@ -150,7 +210,7 @@ export default defineConfig([
           patterns: [
             {
               group: ['../*'],
-              message: 'Use the "@/" alias instead of parent-relative imports.',
+              message: PARENT_IMPORT_MESSAGE,
             },
           ],
         },
@@ -195,6 +255,9 @@ export default defineConfig([
       ],
     },
   },
+
+  // Public APIs: outside a module, import its index.ts; inside it, import files directly.
+  ...publicApiConfigs,
 
   // Tests: fixture URLs (example.com) are fine.
   {

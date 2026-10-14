@@ -1,9 +1,34 @@
 import { useEffect, useState } from 'react';
 
-export const useDebounce = <T>(value: T, delayMs = 300): T => {
+interface IUseDebounceOptions<T> {
+  /** Values to apply right away instead of after the delay (e.g. a cleared search). */
+  isImmediate?: (value: T) => boolean;
+}
+
+/**
+ * Returns `value` once it has stopped changing for `delayMs`.
+ * Values matching `isImmediate` are returned right away, and they also replace any value still
+ * waiting, so an older value can't come back after them.
+ */
+export const useDebounce = <T>(
+  value: T,
+  delayMs = 300,
+  { isImmediate }: IUseDebounceOptions<T> = {},
+): T => {
   const [debouncedValue, setDebouncedValue] = useState(value);
+  const immediate = isImmediate?.(value) ?? false;
+
+  // Adjusting state while rendering (React's pattern for syncing with props): no effect, no extra
+  // commit. Runs only when an immediate value differs from the stored one, so it settles at once.
+  if (immediate && !Object.is(debouncedValue, value)) {
+    setDebouncedValue(value);
+  }
 
   useEffect(() => {
+    if (immediate) {
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       setDebouncedValue(value);
     }, delayMs);
@@ -11,7 +36,7 @@ export const useDebounce = <T>(value: T, delayMs = 300): T => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [value, delayMs]);
+  }, [value, delayMs, immediate]);
 
-  return debouncedValue;
+  return immediate ? value : debouncedValue;
 };

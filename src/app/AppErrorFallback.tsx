@@ -1,17 +1,16 @@
 import { RotateCw } from 'lucide-react';
 
-import { ErrorScreen } from '@/components/feedback/ErrorScreen';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/Button';
+import { ErrorScreen, MainLayout, Button } from '@/components';
 import { env } from '@/config/env';
 import { getErrorMessage } from '@/utils/error';
+import { pageTitle } from '@/utils/page-title';
 
 import type { FallbackProps } from 'react-error-boundary';
 
 /** Last-resort fallback for errors outside the router (e.g. in providers). */
 export const AppErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => (
   <MainLayout>
-    <title>Something went wrong · Sports Leagues</title>
+    <title>{pageTitle('Something went wrong')}</title>
     <ErrorScreen
       code="500"
       title="Something went wrong"

@@ -32,12 +32,14 @@ Prettier runs through ESLint, so formatting problems show up as lint errors.
 Feature-based layout (Bulletproof React style). Leagues code lives in `src/features/leagues/` (`api/`, `components/`, `hooks/`, `store/`, `types/`, `utils/`). `src/pages` composes features, and `src/app` holds the router, providers and root layout. The top-level shared folders (`components`, `hooks`, `api`, `lib`, `store`, `utils`, `constants`, `config`, `types`) hold code that isn't tied to one feature.
 
 **ESLint enforces these architecture rules** (`eslint.config.js`), so code that breaks them fails lint and CI:
+
 - **One-way imports:** shared → `features` → `pages` → `app`. Shared folders never import from features, pages or app. A feature never imports from another feature.
 - **Public APIs:** from outside, import `@/components`, `@/hooks` and `@/features/<name>` only through their `index.ts`, never a deep path. Inside one of those modules, import sibling files directly, never through its own index, to avoid cycles. A feature's `index.ts` exports only what pages use. `src/testing/**` is the exception and may import feature internals.
 - **Always use the `@/…` alias**, never `../`.
 - **No URL literals in app code:** the base URL comes from `env.apiUrl` (`src/config/env.ts`). Endpoint paths, query param names and image sizes go in `src/constants/api.ts`, and feature-level constants go in `features/leagues/constants.ts`. Tests are exempt.
 
 **Data flow:**
+
 - `src/api/client.ts` is a small `fetch` wrapper (timeouts, typed `ApiError`, `buildUrl`). Feature calls (`features/leagues/api/get-*.ts`) fetch the DTOs and map them to app types with `normalizeLeagues` / `normalizeSeasons`. Components only ever see the app types (`types/league.ts`), never DTOs (`types/league.dto.ts`).
 - **Server state uses TanStack Query.** `src/lib/query-client.ts` sets `staleTime`/`gcTime: Infinity` with no refetch on focus or reconnect, so each endpoint is fetched once per session. Query keys come from the factory in `leagues.queries.ts`. Query functions **deliberately don't pass the AbortSignal** to fetch, so requests aren't cancelled and repeated on unmount or StrictMode remount, and tests assert exactly one request. Derived views (sport options, filtered and grouped results, dialog header) reuse the single cached list through `select` in hooks.
 - **UI state uses Zustand.** `features/leagues/store/leagues-ui.store.ts` holds search, sport and the open league, and `src/store/theme.store.ts` holds the theme. Components subscribe to individual values.
@@ -58,6 +60,7 @@ Feature-based layout (Bulletproof React style). Leagues code lives in `src/featu
 ## Testing
 
 Vitest (jsdom) + React Testing Library + MSW. Test files sit next to their source as `*.test.ts(x)`. Import `describe`/`it`/`expect` explicitly from `vitest`, since globals are off.
+
 - MSW intercepts real fetches (`src/testing/mocks/handlers.ts` with fixture data in `mocks/data.ts`), so tests run the real fetch → query → component path. To override a response in a test, use `server.use(...)`. Unhandled requests error.
 - `src/testing/test-utils.tsx`: `renderWithProviders` wraps in StrictMode with a fresh QueryClient (retry off) and returns `user` (userEvent). `renderRoute(path)` renders the real app routes in a memory router.
 - `setup.ts` resets the Zustand stores and `localStorage` before each test. `restoreMocks: true` is set.

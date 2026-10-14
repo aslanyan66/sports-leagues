@@ -5,7 +5,7 @@ import { getSeasons } from '@/features/leagues/api/get-seasons';
 
 // Query key factory: `all` is the prefix for everything league-related,
 // so `list` and each league's `seasons` can be invalidated separately or together.
-export const leagueKeys = {
+const leagueKeys = {
   all: ['leagues'] as const,
   list: () => [...leagueKeys.all, 'list'] as const,
   seasons: (leagueId: string) => [...leagueKeys.all, 'seasons', leagueId] as const,

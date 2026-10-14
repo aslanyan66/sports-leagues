@@ -17,7 +17,7 @@ export interface ILeaguesResponseDto {
 }
 
 /** One item of `search_all_seasons.php?badge=1` → `seasons[]`. */
-export interface ISeasonDto {
+interface ISeasonDto {
   strSeason: string;
   /** null when the API has no badge for that season. */
   strBadge?: string | null;

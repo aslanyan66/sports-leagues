@@ -119,6 +119,9 @@ const architectureZones = [
 export default defineConfig([
   globalIgnores(['dist', 'node_modules', 'coverage']),
 
+  // An `eslint-disable` comment that no longer silences anything is itself an error.
+  { linterOptions: { reportUnusedDisableDirectives: 'error' } },
+
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -170,9 +173,16 @@ export default defineConfig([
           custom: { regex: '^I[A-Z]', match: true },
         },
       ],
+      // Unused variables, imports, parameters and caught errors (prefix with _ to keep one on purpose).
+      // Unused exports, files and dependencies across files are found by knip (`npm run knip`).
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
       ],
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': [
@@ -195,6 +205,7 @@ export default defineConfig([
         { namedComponents: 'arrow-function', unnamedComponents: 'arrow-function' },
       ],
       'react/hook-use-state': 'error',
+      'react/no-unused-prop-types': 'error',
 
       /* ---------- React Hooks ---------- */
       'react-hooks/rules-of-hooks': 'error',

@@ -7,7 +7,7 @@ import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-rout
 import { routes as appRoutes } from '@/app/routes';
 import { createQueryClient } from '@/lib/query-client';
 
-export const createTestQueryClient = (): QueryClient => {
+const createTestQueryClient = (): QueryClient => {
   const client = createQueryClient();
   // Same caching behavior as the app, but fail fast instead of retrying.
   client.setDefaultOptions({

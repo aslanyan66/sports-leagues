@@ -27,17 +27,18 @@ No extra setup is needed. The `.env` file is committed on purpose: it only holds
 
 ## Scripts
 
-| Command                 | Description                                     |
-| ----------------------- | ----------------------------------------------- |
-| `npm run dev`           | Start the dev server                            |
-| `npm run build`         | Type-check and build for production             |
-| `npm run preview`       | Serve the production build locally              |
-| `npm test`              | Run all tests once                              |
-| `npm run test:watch`    | Run tests in watch mode                         |
-| `npm run test:coverage` | Run tests with a coverage report                |
-| `npm run lint`          | Lint with ESLint                                |
-| `npm run format`        | Format with Prettier                            |
-| `npm run check`         | Type-check, lint, format check and tests in one |
+| Command                 | Description                                    |
+| ----------------------- | ---------------------------------------------- |
+| `npm run dev`           | Start the dev server                           |
+| `npm run build`         | Type-check and build for production            |
+| `npm run preview`       | Serve the production build locally             |
+| `npm test`              | Run all tests once                             |
+| `npm run test:watch`    | Run tests in watch mode                        |
+| `npm run test:coverage` | Run tests with a coverage report               |
+| `npm run lint`          | Lint with ESLint                               |
+| `npm run knip`          | Find unused files, exports and dependencies    |
+| `npm run format`        | Format with Prettier                           |
+| `npm run check`         | Type-check, lint, knip, format check and tests |
 
 ## API
 
@@ -57,7 +58,7 @@ Endpoint paths and parameters live in `src/constants/api.ts`. The free key retur
 - **Tailwind CSS v4**, **Radix UI** (accessible dropdown and dialog), **Embla Carousel**, **Lucide** icons
 - **React Router** and **react-error-boundary** for routing and error handling
 - **Vitest**, **React Testing Library** and **MSW** for tests
-- **ESLint** and **Prettier** for code quality
+- **ESLint**, **Prettier** and **Knip** for code quality
 
 ## Architecture
 

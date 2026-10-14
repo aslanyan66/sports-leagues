@@ -1,0 +1,4 @@
+# Dependency install scripts pnpm may run. unrs-resolver's postinstall only downloads its native
+# binary as a fallback; pnpm already installs that binary as a regular optional dependency.
+allowBuilds:
+  unrs-resolver: false

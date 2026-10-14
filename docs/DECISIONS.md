@@ -117,7 +117,7 @@ Vitest + React Testing Library, with **MSW** mocking the API at the network leve
 
 - TypeScript in strict mode plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` and related flags.
 - ESLint: `typescript-eslint` strict type-checked rules (no `any`), React, React Hooks (`exhaustive-deps` as a warning), jsx-a11y, import ordering and architecture rules, TanStack Query, Vitest and Testing Library rules. Prettier (with Tailwind class sorting) runs through ESLint.
-- **No unused code:** TypeScript (`noUnusedLocals`, `noUnusedParameters`) and ESLint catch unused variables, imports, parameters, props and leftover `eslint-disable` comments as you type. Knip (`npm run knip`) finds what a single file can't show: unused files, exports and dependencies. Both run in `npm run check` and CI.
+- **No unused code:** TypeScript (`noUnusedLocals`, `noUnusedParameters`) and ESLint catch unused variables, imports, parameters, props and leftover `eslint-disable` comments as you type. Knip (`pnpm knip`) finds what a single file can't show: unused files, exports and dependencies. Both run in `pnpm check` and CI.
 - The React Compiler runs through Babel and memoizes components automatically.
 
 ## If I had more time

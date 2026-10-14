@@ -174,7 +174,7 @@ export default defineConfig([
         },
       ],
       // Unused variables, imports, parameters and caught errors (prefix with _ to keep one on purpose).
-      // Unused exports, files and dependencies across files are found by knip (`npm run knip`).
+      // Unused exports, files and dependencies across files are found by knip (`pnpm knip`).
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

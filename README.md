@@ -2,6 +2,8 @@
 
 A single-page app for browsing sports leagues from [TheSportsDB](https://www.thesportsdb.com/free_sports_api). Search leagues by name, filter them by sport, and open a league to swipe through its season badges.
 
+**Live demo:** <http://ec2-16-171-20-189.eu-north-1.compute.amazonaws.com/> (deployed on AWS EC2 with Docker and nginx)
+
 ## Features
 
 - League list showing name, sport and alternate name
@@ -101,6 +103,20 @@ Three rules keep it clean, all enforced by ESLint:
 - **Alias imports:** always `@/…`, never `../../`.
 
 **Components** are small, single-purpose pieces: generic ones in `src/components` (Button, Dialog, Carousel…) are combined into league-specific ones in the feature. **Server data** lives in TanStack Query and **UI state** in Zustand. More in [design decisions](docs/DECISIONS.md).
+
+## Deployment
+
+The app runs on an AWS EC2 instance (Amazon Linux 2023, `eu-north-1`) at <http://ec2-16-171-20-189.eu-north-1.compute.amazonaws.com/>.
+
+The `Dockerfile` has two stages: Node 22 builds the site with `pnpm build`, then only `dist/` is copied into an `nginx:1.28-alpine` image. `nginx.conf` serves it with a fallback to `index.html` for client-side routes, long-term caching for the fingerprinted files in `/assets`, and gzip.
+
+To deploy a new version, build the image for the instance's x86 CPU, send it over SSH and restart the container:
+
+```bash
+docker buildx build --platform linux/amd64 -t sports-leagues:amd64 --load .
+docker save sports-leagues:amd64 | gzip | ssh -i <key>.pem ec2-user@<host> 'gunzip | docker load'
+ssh -i <key>.pem ec2-user@<host> 'docker rm -f sports-leagues; docker run -d --name sports-leagues -p 80:80 --restart unless-stopped sports-leagues:amd64'
+```
 
 ## More
 

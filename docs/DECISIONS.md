@@ -37,7 +37,7 @@ Why not Redux or Context: Redux Toolkit is a lot of setup for four values. Conte
 
 ## API notes
 
-- The free API key (`3`) returns a **limited sample** of leagues (TheSportsDB limits free-key results). It changes over time, so the app assumes nothing about its size or which sports it contains, and handles a missing `strLeagueAlternate` ("No alternate name"). Tests use a richer mock dataset to cover the full behavior.
+- The free test API key (`123`) returns a **limited sample** of leagues (TheSportsDB limits free-key results). It changes over time, so the app assumes nothing about its size or which sports it contains, and handles a missing `strLeagueAlternate` ("No alternate name"). Tests use a richer mock dataset to cover the full behavior.
 - Text fields the app relies on (`strLeague`, `strSport`) are typed as nullable and normalized defensively, so one incomplete row can't break the whole list.
 - Responses are typed with TypeScript but not validated at runtime. For production I'd add schema validation (e.g. zod) at the API boundary.
 - A small `fetch` wrapper is used instead of axios: the app only needs GET, timeouts (`AbortSignal.timeout`) and typed errors, which `fetch` covers without the extra dependency.

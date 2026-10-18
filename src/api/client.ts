@@ -9,7 +9,7 @@ interface IGetOptions {
 }
 
 export const buildUrl = (path: string, params?: QueryParams): string => {
-  // Concatenate instead of `new URL(path, base)`, which would drop the base path (/api/v1/json/3).
+  // Concatenate instead of `new URL(path, base)`, which would drop the base path (/api/v1/json/123).
   const url = new URL(`${env.apiUrl.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`);
 
   if (params) {

@@ -42,7 +42,7 @@ No extra setup is needed. The `.env` file is committed on purpose: it only holds
 
 ## API
 
-Base URL (from `.env`): `https://www.thesportsdb.com/api/v1/json/3` (free public key `3`).
+Base URL (from `.env`): `https://www.thesportsdb.com/api/v1/json/123` (free public test key `123`).
 
 | Endpoint                                   | Used for                   |
 | ------------------------------------------ | -------------------------- |
